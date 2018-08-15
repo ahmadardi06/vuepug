@@ -1,0 +1,54 @@
+extends layout
+
+block content
+	h1= title
+	p Welcome to #{title}
+
+	#app
+		//- button(@click='make_req_handler') Click Once
+		p {{ message }}
+		p {{ info }}
+		p {{ client }}
+
+		h1 Bitcoin Price Index
+		.currency(v-for='currency in info')
+			p {{ currency.description }}:
+				span(v-html='currency.symbol')
+				span {{ currency.rate_float }}
+	script.
+		var app = new Vue({
+			el: '#app',
+			data: () => ({
+				message: 'Hello Vue!',
+				info: null,
+				client: null,
+			}),
+			methods: {
+				make_req_handler() {
+					axios.all([
+						this.req1(),
+						this.req2()
+					])
+					.then(
+						axios.spread((firstResp, secondResp) => {
+							this.info = firstResp.data.bpi
+							this.client = secondResp
+						})
+					)
+				},
+				req1(){
+					return axios.get('https://api.coindesk.com/v1/bpi/currentprice.json')
+				},
+				req2(){
+					return axios.get('https://api.coindesk.com/v1/bpi/currentprice.json')
+				}
+			},
+			filters: {
+				currencyDecimal(value) {
+			    	return value.toFixed(2)
+			    }
+			},
+			
+		});
+
+		app.make_req_handler()
